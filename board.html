@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JAPAN 2026-27 - Master Board v20.86</title>
+<title>JAPAN 2026-27 - Master Board v20.87</title>
 <style>
   :root{
     --bg:#0d0f14; --card:#161a22; --card2:#1c212c; --line:#2a3140;
@@ -499,13 +499,37 @@
   #jmFilters{white-space:nowrap}
   .jm-top select{font-size:14px;padding:9px 10px}
   .jm-legend span{white-space:normal;display:inline}
+  /* v20.87: filters live on the map; cooperative gestures; tidy */
+  .jm-ctl-left{left:8px;right:auto}
+  .jm-ctl-left button{width:auto;min-width:40px;padding:0 10px;gap:4px;font-size:16px}
+  .jm-ctl-left button.on{border-color:#7fe0d8;color:#7fe0d8}
+  #jmFiltersN{font-size:12px;font-weight:700}
+  .jm-fsheet{position:absolute;left:8px;right:8px;top:56px;bottom:8px;z-index:7;background:rgba(19,23,34,.97);border:1px solid #2a3140;border-radius:12px;padding:10px 12px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+  .jm-fsheet[hidden]{display:none}
+  .jm-fsheet-h{display:flex;align-items:center;gap:8px;font-size:15px;color:#fff}
+  .jm-fsheet-h .jm-btn{margin-left:auto}
+  .jm-fsheet-hint{font-size:11.5px;color:#8a93a6}
+  .jm-fsheet-t{font-size:11px;color:#8a93a6;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .jm-fsheet-t small{text-transform:none;letter-spacing:0;font-size:11px;color:#6c7891;flex-basis:100%}
+  .jm-fsheet-acts{margin-left:auto;display:flex;gap:4px}
+  .jm-fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+  .jm-ftog{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #2a3140;border-radius:9px;background:#141925;color:#8a93a6;font-size:13px;cursor:pointer;user-select:none;min-height:40px}
+  .jm-ftog .box{width:18px;height:18px;border-radius:5px;border:2px solid #3a4458;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:12px;color:#0f1218}
+  .jm-ftog.on{color:#fff;border-color:var(--c,#7fe0d8);background:#1a2030}
+  .jm-ftog.on .box{background:var(--c,#7fe0d8);border-color:var(--c,#7fe0d8)}
+  .jm-ftog .lab{flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .jm-ftog small{display:block;font-size:10.5px;color:#8a93a6;white-space:normal}
+  .maplibregl-cooperative-gesture-screen{background:rgba(14,17,24,.72);font-size:15px;color:#e8ecf3;font-family:inherit;text-align:center;border-radius:10px}
+  .maplibregl-cooperative-gesture-screen .maplibregl-desktop-message{display:none}
+  .maplibregl-cooperative-gesture-screen .maplibregl-mobile-message{display:block}
+  @media (hover:hover){.maplibregl-cooperative-gesture-screen .maplibregl-desktop-message{display:block}.maplibregl-cooperative-gesture-screen .maplibregl-mobile-message{display:none}}
 
 </style>
 </head>
 <body>
 
 <header>
-  <h1>JAPAN <span>2026-27</span> - MASTER BOARD v20.86</h1>
+  <h1>JAPAN <span>2026-27</span> - MASTER BOARD v20.87</h1>
   <div class="sub">Solo · Oct 22 2026 → Jan 7 2027 · 77 nights · board 77/77 BOOKED · updated Sep 21 2026</div>
 </header>
 
@@ -612,7 +636,6 @@
   <div class="jm" id="jm">
     <div class="jm-top">
       <select id="jmChapter" title="chapter"></select>
-      <button class="jm-btn" id="jmFilters" title="categories and layers">⚙ Filters</button>
     </div>
     <div class="jm-top jm-actions-row">
       <button class="jm-btn" id="jmHome" title="current lodging">🏠 Home</button>
@@ -622,9 +645,16 @@
       <button class="jm-btn" id="jmListBtn" title="pin list">☰ List</button>
     </div>
     <div class="jm-status" id="jmStatus">…</div>
-    <div class="jm-chips" id="jmChips"></div>
     <div class="jm-wrap" id="jmWrap">
       <div id="jmMap"></div>
+      <div class="jm-ctl jm-ctl-left">
+        <button id="jmFilters" title="filters">⚙<span id="jmFiltersN"></span></button>
+      </div>
+      <div class="jm-fsheet" id="jmFSheet" hidden>
+        <div class="jm-fsheet-h"><b>Filters</b><span class="jm-fsheet-hint">tap to switch each one on or off</span><button class="jm-btn small on" id="jmFDone">Done</button></div>
+        <div class="jm-fsheet-sec"><div class="jm-fsheet-t">Categories <span class="jm-fsheet-acts"><button class="jm-btn small" id="jmFAll">All</button><button class="jm-btn small" id="jmFNone">None</button><button class="jm-btn small" id="jmFMine">★ Mine only</button></span></div><div class="jm-fgrid" id="jmFCats"></div></div>
+        <div class="jm-fsheet-sec"><div class="jm-fsheet-t">Live layers <small>from OpenStreetMap · need internet · load around where the map is looking</small></div><div class="jm-fgrid" id="jmFLive"></div></div>
+      </div>
       <div class="jm-ctl">
         <button id="jmFull" title="expand">⤢</button>
         <button id="jmLoc" title="my position: off / follow / heading-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="8"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg></button>
@@ -799,7 +829,7 @@
     <div class="pill">Skeleton total <b>~₪23,600</b></div>
   </div>
 
-<div class="foot">v20.86 · toilet finder falls back to the map tiles when the live service is blocked, third mirror added · v20.85 toilet lookup switched to GET (works from a downloaded file), lookup status moved off the button, even 3-column action grid · v20.84 map bar tidied: chapter + Filters button, action grid, filters open as a panel, Diagnose button reports GPS / tiles / live services · v20.83 toilet finder: live OSM data, five colors (free / paid / underground / closed-now by Japan time / walk-in venues), nearest-open-toilet button · v20.82 map: Toilets + Konbini layers from the map data, Nearest-toilet button with walking directions · v20.81 medication: pharmacy papers (Sep 22) and MHLW import certificate application (Sep 24) added, Oct 8 turned into the backstop · v20.80 Dec 13 rebuilt as the east-Tokyo day (sword museum → Kiyosumi-Shirakawa → Kuramae → Kameido), Ginza blade shops moved to Dec 18 · v20.79 verified 2026 rule changes: tax-free refund system from Nov 1, Nov 21-23 long weekend, Kansai foliage forecast, Kyoto/Hokkaido/Osaka lodging taxes, ¥3,000 departure tax, Jan 7 departure checklist · v20.78 meet Dru on Nov 18 (Ark Building, Kamo riverside) · v20.77 chapter hues separated (Kobe green, Kyoto cyan, Fukuoka violet, Tokyo II magenta, Osaka finale blue) · v20.76 chapters no longer auto-fold (the one-chapter toggle is off by default) · v20.75 opening a chapter keeps it in place when the previous one folds (no scroll jump) · v20.74 the timeline line is a per-chapter gradient: each segment matches its chapter dot and the open chapter stretches its color, animated · v20.73 single timeline line that fades to the open chapter color (lighter when a day is open), all side rails removed · v20.72 rails slimmed to zero-width color lines, indents removed · v20.71 schedule wayfinding: chapter hue rails, nested guide lines, sticky chapter + day headers, one-chapter-at-a-time, Today + Collapse buttons · v20.70 Route renamed Schedule · Currency open by default · v20.69 every top-level section is now a collapsible (Currency, Deadlines, Map, Route, Flights + reference, Emergency, Board info) · v20.68 G6PD flashcards for doctor, pharmacy, restaurant · v20.67 Warhammer Namba card keeps the Matsuda Bldg 3F note · v20.66 three shotengai food options (Sugamo Oct 27, Sunamachi Dec 13, Togoshi Ginza Dec 16) · G6PD and board info folded into collapsibles · v20.65 G6PD medical alert on the Emergency card · K-BOOKS Cosplay Pavilion (Oct 25) · v20.64 AUDIT: 120 venues verified against Google Places + web; Warhammer moved to Fri Oct 30 (closed Wed), Wasso festival relocated to Naniwa Palace park Nov 1 (TBC), Midosuji Autumn Party fixed to Nov 3, Epais moved to Thu Nov 5 (relocated, Thu/Fri only), NINJA AKASAKA is now NINJA TOKYO Otemachi, Jumbo Hanare is in Hongo, Baroque is in Omotesando, closed-day notes added · v20.63 ASOBIBAR game bar (Oct 27 night anchor, Dec 14 return) · v20.62 WoW Forever name-reservation window on the tracker · v20.61 Fish Spa Kyoto (Nov 21) · Gyoen ginkgo morning (Nov 24, Midosuji fallback) · Gaien ginkgo check (Dec 12) · v20.60 Emergency card (AIG, 110/119, embassy, lost passport) · arrival = Skyliner + taxi · v20.59 Skyliner arrival (N'EX was never booked) · AnyFone SIM plan · official rail maps · sturdier currency fetch · v20.58 Meshida comedy walk booked Oct 27 18:00 · v20.57 pin map (board venues by category, own pins, GPS + compass when hosted) · v20.19 day-card color coding · full changelog retired · current state: 74/77 nights booked (Narita night open) · all Sep purchases done (USJ, MAPPA, Nintendo Museum paid M0715322992) · next action ~Oct 10 (N'EX + MHLW)</div></div></details>
+<div class="foot">v20.87 · map: two-finger pan so the page scrolls (cooperative gestures, off in full screen), filters as an on-map sheet with plain toggles, toilets load around where the map is looking · v20.86 toilet finder falls back to the map tiles when the live service is blocked, third mirror added · v20.85 toilet lookup switched to GET (works from a downloaded file), lookup status moved off the button, even 3-column action grid · v20.84 map bar tidied: chapter + Filters button, action grid, filters open as a panel, Diagnose button reports GPS / tiles / live services · v20.83 toilet finder: live OSM data, five colors (free / paid / underground / closed-now by Japan time / walk-in venues), nearest-open-toilet button · v20.82 map: Toilets + Konbini layers from the map data, Nearest-toilet button with walking directions · v20.81 medication: pharmacy papers (Sep 22) and MHLW import certificate application (Sep 24) added, Oct 8 turned into the backstop · v20.80 Dec 13 rebuilt as the east-Tokyo day (sword museum → Kiyosumi-Shirakawa → Kuramae → Kameido), Ginza blade shops moved to Dec 18 · v20.79 verified 2026 rule changes: tax-free refund system from Nov 1, Nov 21-23 long weekend, Kansai foliage forecast, Kyoto/Hokkaido/Osaka lodging taxes, ¥3,000 departure tax, Jan 7 departure checklist · v20.78 meet Dru on Nov 18 (Ark Building, Kamo riverside) · v20.77 chapter hues separated (Kobe green, Kyoto cyan, Fukuoka violet, Tokyo II magenta, Osaka finale blue) · v20.76 chapters no longer auto-fold (the one-chapter toggle is off by default) · v20.75 opening a chapter keeps it in place when the previous one folds (no scroll jump) · v20.74 the timeline line is a per-chapter gradient: each segment matches its chapter dot and the open chapter stretches its color, animated · v20.73 single timeline line that fades to the open chapter color (lighter when a day is open), all side rails removed · v20.72 rails slimmed to zero-width color lines, indents removed · v20.71 schedule wayfinding: chapter hue rails, nested guide lines, sticky chapter + day headers, one-chapter-at-a-time, Today + Collapse buttons · v20.70 Route renamed Schedule · Currency open by default · v20.69 every top-level section is now a collapsible (Currency, Deadlines, Map, Route, Flights + reference, Emergency, Board info) · v20.68 G6PD flashcards for doctor, pharmacy, restaurant · v20.67 Warhammer Namba card keeps the Matsuda Bldg 3F note · v20.66 three shotengai food options (Sugamo Oct 27, Sunamachi Dec 13, Togoshi Ginza Dec 16) · G6PD and board info folded into collapsibles · v20.65 G6PD medical alert on the Emergency card · K-BOOKS Cosplay Pavilion (Oct 25) · v20.64 AUDIT: 120 venues verified against Google Places + web; Warhammer moved to Fri Oct 30 (closed Wed), Wasso festival relocated to Naniwa Palace park Nov 1 (TBC), Midosuji Autumn Party fixed to Nov 3, Epais moved to Thu Nov 5 (relocated, Thu/Fri only), NINJA AKASAKA is now NINJA TOKYO Otemachi, Jumbo Hanare is in Hongo, Baroque is in Omotesando, closed-day notes added · v20.63 ASOBIBAR game bar (Oct 27 night anchor, Dec 14 return) · v20.62 WoW Forever name-reservation window on the tracker · v20.61 Fish Spa Kyoto (Nov 21) · Gyoen ginkgo morning (Nov 24, Midosuji fallback) · Gaien ginkgo check (Dec 12) · v20.60 Emergency card (AIG, 110/119, embassy, lost passport) · arrival = Skyliner + taxi · v20.59 Skyliner arrival (N'EX was never booked) · AnyFone SIM plan · official rail maps · sturdier currency fetch · v20.58 Meshida comedy walk booked Oct 27 18:00 · v20.57 pin map (board venues by category, own pins, GPS + compass when hosted) · v20.19 day-card color coding · full changelog retired · current state: 74/77 nights booked (Narita night open) · all Sep purchases done (USJ, MAPPA, Nintendo Museum paid M0715322992) · next action ~Oct 10 (N'EX + MHLW)</div></div></details>
 
 <script>
 const LEGS = [
@@ -1416,7 +1446,7 @@ function drawCone(){var s=120,c=document.createElement('canvas');c.width=c.heigh
 
 /* ---------- map ---------- */
 function initMap(){if(S.map)return;var home=homeOf(S.chapter);
- try{S.map=new maplibregl.Map({container:'jmMap',style:window.MAP_STYLE,center:[home.lng,home.lat],zoom:14,attributionControl:false,pitchWithRotate:false,maxPitch:0,touchPitch:false,fadeDuration:80});}
+ try{S.map=new maplibregl.Map({container:'jmMap',style:window.MAP_STYLE,center:[home.lng,home.lat],zoom:14,attributionControl:false,pitchWithRotate:false,maxPitch:0,touchPitch:false,fadeDuration:80,cooperativeGestures:true,locale:{'CooperativeGesturesHandler.WindowsHelpText':'Hold Ctrl and scroll to zoom the map','CooperativeGesturesHandler.MacHelpText':'Hold ⌘ and scroll to zoom the map','CooperativeGesturesHandler.MobileHelpText':'Two fingers move the map · one finger scrolls the page'}});}
  catch(e){note('The map cannot render in this browser (no WebGL). The pin list below still works.');return;}
  var map=S.map;
  map.on('load',onMapLoad);
@@ -1465,23 +1495,20 @@ function fitChapter(idx){if(!S.map)return;var h=homeOf(idx),b=null,n=0;allPins()
 function flyTo(p,z){if(!S.map||p.lat==null)return;S.follow=0;updateLocBtn();S.map.easeTo({center:[p.lng,p.lat],zoom:Math.max(S.map.getZoom(),z||15),duration:600});}
 
 /* ---------- chips / chapter / status ---------- */
-function renderChips(){var el=$('jmChips'),h='';
- var all=S.cats.size===CAT_KEYS.length&&!S.mineOnly;
- h+='<div class="jm-chip-h">Categories · tap one to show only it, tap again for all</div>';
- h+='<div class="jm-chip'+(all?' on':'')+'" data-cat="__all">All</div>';
- h+='<div class="jm-chip'+(S.mineOnly?' on':'')+'" data-cat="__mine" style="--c:#ffffff">★ Mine</div>';
- CAT_KEYS.forEach(function(k){var c=CATS[k];h+='<div class="jm-chip'+(S.cats.has(k)?' on':'')+'" data-cat="'+k+'" style="--c:'+c.color+'">'+c.icon+' <b>'+esc(c.label)+'</b></div>';});
- h+='<div class="jm-chip-h">Live layers · from OpenStreetMap, need internet</div>';
- h+='<div class="jm-chip'+(S.toilets?' on':'')+'" data-cat="__toilets" style="--c:#7fe0d8" title="public toilets from the map data">🚻 <b>Toilets</b></div><div class="jm-chip'+(S.konbini?' on':'')+'" data-cat="__konbini" style="--c:#ffd166" title="convenience stores: the universal toilet">🏪 <b>Konbini</b></div>';
- el.innerHTML=h;
- var fb=$('jmFilters');if(fb){var n=(all?0:S.cats.size)+(S.mineOnly?1:0)+(S.toilets?1:0)+(S.konbini?1:0);fb.textContent='⚙ Filters'+(n?' · '+n:'');fb.classList.toggle('on',!all||S.mineOnly||S.toilets||S.konbini);}}
-
-function chipTap(cat){/* tap a category while everything is on = show only that one; tap the only active one = back to all; otherwise toggle */
+function renderChips(){var cats=$('jmFCats'),live=$('jmFLive');if(!cats)return;var h='';
+ CAT_KEYS.forEach(function(k){var c=CATS[k];h+='<div class="jm-ftog'+(S.cats.has(k)?' on':'')+'" data-cat="'+k+'" style="--c:'+c.color+'"><span class="box">'+(S.cats.has(k)?'✓':'')+'</span><span class="lab">'+c.icon+' '+esc(c.label)+'</span></div>';});
+ cats.innerHTML=h;
+ live.innerHTML='<div class="jm-ftog'+(S.toilets?' on':'')+'" data-cat="__toilets" style="--c:#7fe0d8"><span class="box">'+(S.toilets?'✓':'')+'</span><span class="lab">🚻 Toilets<small>free / paid / underground / closed now</small></span></div>'+
+  '<div class="jm-ftog'+(S.konbini?' on':'')+'" data-cat="__konbini" style="--c:#ffd166"><span class="box">'+(S.konbini?'✓':'')+'</span><span class="lab">🏬 Walk-in venues<small>konbini, arcades, malls, chain cafés</small></span></div>';
+ $('jmFMine').classList.toggle('on',S.mineOnly);
+ var all=S.cats.size===CAT_KEYS.length&&!S.mineOnly;var n=(all?0:1)+(S.mineOnly?1:0)+(S.toilets?1:0)+(S.konbini?1:0);
+ $('jmFiltersN').textContent=n?' '+n:'';$('jmFilters').classList.toggle('on',n>0);}
+function chipTap(cat){/* plain toggles */
+ if(cat==='__toilets'||cat==='__konbini')return; /* handled by the toilet module */
  if(cat==='__all'){S.cats=new Set(CAT_KEYS);S.mineOnly=false;}
- else if(cat==='__mine'){S.mineOnly=!S.mineOnly;if(S.mineOnly&&S.cats.size===0)S.cats=new Set(CAT_KEYS);}
- else if(S.cats.size===CAT_KEYS.length){S.cats=new Set([cat]);}
- else if(S.cats.size===1&&S.cats.has(cat)){S.cats=new Set(CAT_KEYS);}
- else{if(S.cats.has(cat)){S.cats.delete(cat);}else{S.cats.add(cat);}}
+ else if(cat==='__none'){S.cats=new Set();}
+ else if(cat==='__mine'){S.mineOnly=!S.mineOnly;}
+ else{if(S.cats.has(cat))S.cats.delete(cat);else S.cats.add(cat);}
  savePrefs();refresh();}
 function renderChapters(){var sel=$('jmChapter'),h='<option value="all">All chapters</option>';D.legs.forEach(function(l){h+='<option value="'+l.idx+'">'+esc(l.city)+' · '+fmtDate(l.start)+' to '+fmtDate(l.end)+'</option>';});sel.innerHTML=h;sel.value=String(S.chapter);}
 function renderStatus(){var all=allPins(),here=all.filter(visible),onmap=here.filter(function(p){return p.lat!=null;}),approx=here.filter(function(p){return p.src==='approx'&&p.kind!=='mine';}),missing=here.filter(function(p){return p.lat==null;}),mine=here.filter(function(p){return p.kind==='mine';});
@@ -1674,17 +1701,19 @@ function openInBoard(leg,date,act){var legEl=document.querySelector('details.leg
  if(date){var dayEl=legEl.querySelector('details.day[data-date="'+date+'"]');if(dayEl){var sec=dayEl.closest('details.sec');if(sec)sec.open=true;dayEl.open=true;target=dayEl;
   if(act){var acts=dayEl.querySelectorAll('details.act'),want=act.trim().toLowerCase().slice(0,24);for(var i=0;i<acts.length;i++){var t=((acts[i].querySelector('summary')||{}).textContent||'').trim().toLowerCase();if(t.indexOf(want)===0){acts[i].open=true;target=acts[i];break;}}}}}
  if($('jm').classList.contains('jm-full'))toggleFull(false);setTimeout(function(){target.scrollIntoView({behavior:'smooth',block:'start'});},80);}
-function toggleFull(on){var jm=$('jm');if(on===undefined)on=!jm.classList.contains('jm-full');jm.classList.toggle('jm-full',on);$('jmFull').textContent=on?'⤡':'⤢';document.body.style.overflow=on?'hidden':'';setTimeout(function(){if(S.map)S.map.resize();},60);}
+function toggleFull(on){var jm=$('jm');if(on===undefined)on=!jm.classList.contains('jm-full');jm.classList.toggle('jm-full',on);$('jmFull').textContent=on?'⤡':'⤢';document.body.style.overflow=on?'hidden':'';if(S.map&&S.map.cooperativeGestures){if(on)S.map.cooperativeGestures.disable();else S.map.cooperativeGestures.enable();}setTimeout(function(){if(S.map)S.map.resize();},60);}
 
 /* ---------- wiring ---------- */
 function wire(){
- $('jmChips').addEventListener('click',function(e){var c=e.target.closest('.jm-chip');if(c)chipTap(c.dataset.cat);});
+ $('jmFCats').addEventListener('click',function(e){var c=e.target.closest('.jm-ftog');if(c)chipTap(c.dataset.cat);});
+ $('jmFAll').addEventListener('click',function(){chipTap('__all');});$('jmFNone').addEventListener('click',function(){chipTap('__none');});$('jmFMine').addEventListener('click',function(){chipTap('__mine');});
+ $('jmFDone').addEventListener('click',function(){$('jmFSheet').hidden=true;$('jmFilters').classList.remove('open');});
  $('jmChapter').addEventListener('change',function(){S.chapter=this.value==='all'?'all':parseInt(this.value,10);savePrefs();refresh();if(S.chapter!=='all')fitChapter(S.chapter);});
  $('jmHome').addEventListener('click',function(){var idx=S.chapter==='all'?(currentChapterIdx()||0):S.chapter;var h=homeOf(idx);select(h.id,{fly:true,zoom:15});});
  $('jmAdd').addEventListener('click',function(){if(S.mode==='drop'){endMode();return;}startDrop();});
  $('jmPinHere').addEventListener('click',function(){if(!S.pos){toast('No GPS fix yet: tap the position button first');if(navigator.geolocation)startWatch();return;}createPin(S.pos.lat,S.pos.lng);});
  $('jmListBtn').addEventListener('click',function(){toggleList(!S.listOpen);});
- $('jmFilters').addEventListener('click',function(){$('jmChips').classList.toggle('open');});
+ $('jmFilters').addEventListener('click',function(){var sh=$('jmFSheet');sh.hidden=!sh.hidden;});
  $('jmDiag').addEventListener('click',diagnose);
  $('jmListClose').addEventListener('click',function(){toggleList(false);});
  $('jmSearch').addEventListener('input',renderList);
@@ -1819,7 +1848,7 @@ function ensureLayers(){ if(!J()||!J().state.ready)return false; S=J().state; ma
  map.addLayer({id:'jmb-util',type:'symbol',source:'jmb-util',layout:{'icon-image':['get','img'],'icon-size':['interpolate',['linear'],['zoom'],13,0.5,17,0.85],'icon-allow-overlap':true,'icon-ignore-placement':true},filter:['==',['get','show'],1]},'jmb-sel');
  map.on('click','jmb-util',function(e){var f=e.features&&e.features[0];if(!f)return;e.preventDefault();var p=JSON.parse(f.properties.data);showCard(p);});
  map.on('mouseenter','jmb-util',function(){map.getCanvas().style.cursor='pointer';});map.on('mouseleave','jmb-util',function(){map.getCanvas().style.cursor='';});
- map.on('moveend',function(){ if(!(S.toilets||S.konbini))return; var c=map.getCenter(); if(T.lastKey&&haversine({lat:c.lat,lng:c.lng},centerOf(T.lastKey))<450)return; if(map.getZoom()<13.5)return; load(c.lat,c.lng); });
+ map.on('moveend',function(){ if(!(S.toilets||S.konbini))return; if(map.getZoom()<13.5){ setStatus('zoom in to a district to load toilets'); return; } var c=map.getCenter(); if(T.lastKey&&haversine({lat:c.lat,lng:c.lng},centerOf(T.lastKey))<450)return; load(c.lat,c.lng); });
  return true; }
 function centerOf(key){var p=key.split(',');return {lat:+p[0],lng:+p[1]};}
 function icon(emoji,col,strike){var s=48,c=document.createElement('canvas');c.width=c.height=s;var x=c.getContext('2d');x.beginPath();x.arc(24,24,20,0,Math.PI*2);x.fillStyle='#0f1218';x.fill();x.lineWidth=3.5;x.strokeStyle=col;x.stroke();x.font='21px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#fff';x.fillText(emoji,24,26);if(strike){x.strokeStyle=col;x.lineWidth=4;x.beginPath();x.moveTo(10,38);x.lineTo(38,10);x.stroke();}return x.getImageData(0,0,s,s);}
@@ -1840,10 +1869,13 @@ function nearest(){ if(!J()||!J().state.map){alert('Open the map first');return;
 /* ---- hook into the pin map ---- */
 function hook(){ if(!J()){setTimeout(hook,300);return;} var st=J().state; try{ var c=JSON.parse(localStorage.getItem('jmb.toilets')||'{}'); T.cache=c||{}; }catch(e){}
  var btn=$('jmToilet'); if(btn){ var nb=btn.cloneNode(true); btn.parentNode.replaceChild(nb,btn); nb.addEventListener('click',nearest); }
- /* re-point the two chips at this module */
- $('jmChips').addEventListener('click',function(e){ var ch=e.target.closest('.jm-chip'); if(!ch)return; var cat=ch.dataset.cat; if(cat!=='__toilets'&&cat!=='__konbini')return; e.stopImmediatePropagation();
-  if(cat==='__toilets')st.toilets=!st.toilets; else st.konbini=!st.konbini; ch.classList.toggle('on'); if(J().state.map){ ensureLayers(); var c=st.map.getCenter(); if(st.toilets||st.konbini){ if(st.map.getZoom()<14)st.map.easeTo({zoom:15,center:st.pos?[st.pos.lng,st.pos.lat]:c,duration:400}); load(st.pos?st.pos.lat:c.lat,st.pos?st.pos.lng:c.lng); } render(); } try{ var pr=JSON.parse(localStorage.getItem('jmb.map.v1')||'{}'); pr.prefs=pr.prefs||{}; pr.prefs.toilets=st.toilets; pr.prefs.konbini=st.konbini; localStorage.setItem('jmb.map.v1',JSON.stringify(pr)); }catch(e2){} },true);
- var poll=setInterval(function(){ if(J().state.ready){ clearInterval(poll); ensureLayers(); if(st.toilets||st.konbini){ var c=st.map.getCenter(); load(c.lat,c.lng); } } },500);
+ /* live-layer toggles in the filter sheet */
+ $('jmFLive').addEventListener('click',function(e){ var ch=e.target.closest('.jm-ftog'); if(!ch)return; var cat=ch.dataset.cat;
+  if(cat==='__toilets')st.toilets=!st.toilets; else if(cat==='__konbini')st.konbini=!st.konbini; else return;
+  J().refresh(); try{ var pr=JSON.parse(localStorage.getItem('jmb.map.v1')||'{}'); pr.prefs=pr.prefs||{}; pr.prefs.toilets=st.toilets; pr.prefs.konbini=st.konbini; localStorage.setItem('jmb.map.v1',JSON.stringify(pr)); }catch(e2){}
+  if(st.map){ ensureLayers(); refreshHere(); render(); } });
+ function refreshHere(){ if(!(st.toilets||st.konbini))return; if(!st.map)return; var z=st.map.getZoom(); if(z<13.5){ setStatus('zoom in to a district to load toilets (they load around where the map is looking)'); T.feats=[]; render(); return; } var c=st.map.getCenter(); load(c.lat,c.lng); }
+ var poll=setInterval(function(){ if(J().state.ready){ clearInterval(poll); ensureLayers(); refreshHere(); } },500);
  /* legend */ var lg=$('jmFoot'); if(lg&&!$('jmToiletLegend')){ var d=document.createElement('div'); d.id='jmToiletLegend'; d.className='jm-legend'; d.innerHTML='<span style="color:#7cc4ff">🚻 blue = free public</span><span style="color:#4ade80">🚻 green = paid</span><span style="color:#c48a5a">🚇 brown = underground / station, stairs</span><span style="color:#ffd166">🏬 yellow = venue you can walk into (arcade, konbini, mall, chain café)</span><span style="color:#ff5a5a">🚻 red, struck = closed right now (Japan time)</span><span>hours unknown = shown as open, treat with suspicion after midnight</span>'; lg.appendChild(d); }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hook);else hook();
